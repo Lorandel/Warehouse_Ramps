@@ -120,8 +120,18 @@ body {
 /* Motion wrapper for the truck (the element that gets animated) */
 .truck-motion {
   transform-box: fill-box;
-  transform-origin: center;
+  /* default; overridden per side for more natural pivot */
+  transform-origin: 50% 50%;
   will-change: transform, opacity;
+  pointer-events: none;
+}
+
+/* Tractor articulation (rotates around kingpin) */
+.truck-tractor {
+  transform-box: fill-box;
+  /* coupling point is the RIGHT edge of the tractor group */
+  transform-origin: 100% 50%;
+  will-change: transform;
 }
 
 .truck-trailer {
@@ -145,47 +155,90 @@ body {
   stroke-width: 0.5;
 }
 
+.truck-tire {
+  fill: #111827;
+  stroke: #030712;
+  stroke-width: 0.8;
+}
+
+.truck-rim {
+  fill: #9ca3af;
+  opacity: 0.9;
+}
+
 /* Truck arrival animation styles */
 .truck-left-enter {
-  animation: truck-enter-left 1.6s cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
+  animation: truck-enter-left 1.8s cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
+  transform-origin: 100% 50%;
 }
 
 .truck-right-enter {
-  animation: truck-enter-right 1.6s cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
+  animation: truck-enter-right 1.8s cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
+  transform-origin: 0% 50%;
 }
 
 .truck-bottom-enter {
-  animation: truck-enter-bottom 1.6s cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
+  animation: truck-enter-bottom 1.8s cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
+  transform-origin: 50% 0%;
 }
 
 /* Truck departure animation styles */
 .truck-left-exit {
-  animation: truck-exit-left 1.4s cubic-bezier(0.55, 0, 0.8, 0.25) forwards;
+  animation: truck-exit-left 1.6s cubic-bezier(0.55, 0, 0.8, 0.25) forwards;
+  transform-origin: 100% 50%;
 }
 
 .truck-right-exit {
-  animation: truck-exit-right 1.4s cubic-bezier(0.55, 0, 0.8, 0.25) forwards;
+  animation: truck-exit-right 1.6s cubic-bezier(0.55, 0, 0.8, 0.25) forwards;
+  transform-origin: 0% 50%;
 }
 
 .truck-bottom-exit {
-  animation: truck-exit-bottom 1.4s cubic-bezier(0.55, 0, 0.8, 0.25) forwards;
+  animation: truck-exit-bottom 1.6s cubic-bezier(0.55, 0, 0.8, 0.25) forwards;
+  transform-origin: 50% 0%;
+}
+
+/* Articulation: tractor swings while approaching/exiting, then straightens at dock */
+.truck-left-enter .truck-tractor {
+  animation: tractor-left-enter 1.8s cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
+}
+.truck-right-enter .truck-tractor {
+  animation: tractor-right-enter 1.8s cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
+}
+.truck-bottom-enter .truck-tractor {
+  animation: tractor-bottom-enter 1.8s cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
+}
+
+.truck-left-exit .truck-tractor {
+  animation: tractor-left-exit 1.6s cubic-bezier(0.55, 0, 0.8, 0.25) forwards;
+}
+.truck-right-exit .truck-tractor {
+  animation: tractor-right-exit 1.6s cubic-bezier(0.55, 0, 0.8, 0.25) forwards;
+}
+.truck-bottom-exit .truck-tractor {
+  animation: tractor-bottom-exit 1.6s cubic-bezier(0.55, 0, 0.8, 0.25) forwards;
 }
 
 /* Arrival animations */
 @keyframes truck-enter-left {
   0% {
     opacity: 0;
-    transform: translate(-280px, 120px) rotate(-26deg);
+    transform: translate(-340px, 160px) rotate(-28deg);
   }
   15% {
     opacity: 1;
   }
-  55% {
-    transform: translate(-120px, 22px) rotate(-10deg);
+  48% {
+    /* approach on a gentle arc */
+    transform: translate(-150px, 40px) rotate(-14deg);
   }
-  72% {
-    /* slight overshoot to suggest pull-forward before reversing */
-    transform: translate(18px, -6px) rotate(4deg);
+  70% {
+    /* align (still outside), preparing to reverse */
+    transform: translate(-28px, -10px) rotate(9deg);
+  }
+  82% {
+    /* reverse-in (no overshoot into the building face) */
+    transform: translate(-8px, 4px) rotate(4deg);
   }
   100% {
     opacity: 1;
@@ -196,16 +249,19 @@ body {
 @keyframes truck-enter-right {
   0% {
     opacity: 0;
-    transform: translate(280px, 120px) rotate(26deg);
+    transform: translate(340px, 160px) rotate(28deg);
   }
   15% {
     opacity: 1;
   }
-  55% {
-    transform: translate(120px, 22px) rotate(10deg);
+  48% {
+    transform: translate(150px, 40px) rotate(14deg);
   }
-  72% {
-    transform: translate(-18px, -6px) rotate(-4deg);
+  70% {
+    transform: translate(28px, -10px) rotate(-9deg);
+  }
+  82% {
+    transform: translate(8px, 4px) rotate(-4deg);
   }
   100% {
     opacity: 1;
@@ -216,16 +272,19 @@ body {
 @keyframes truck-enter-bottom {
   0% {
     opacity: 0;
-    transform: translate(140px, 260px) rotate(18deg);
+    transform: translate(200px, 320px) rotate(20deg);
   }
   15% {
     opacity: 1;
   }
-  55% {
-    transform: translate(40px, 120px) rotate(8deg);
+  50% {
+    transform: translate(70px, 150px) rotate(10deg);
   }
-  80% {
-    transform: translate(-10px, 18px) rotate(-3deg);
+  75% {
+    transform: translate(-16px, 36px) rotate(-6deg);
+  }
+  86% {
+    transform: translate(6px, 10px) rotate(-2deg);
   }
   100% {
     opacity: 1;
@@ -240,15 +299,15 @@ body {
     transform: translate(0, 0) rotate(0deg);
   }
   18% {
-    /* pull out a touch, then start turning */
-    transform: translate(20px, -4px) rotate(6deg);
+    /* pull forward out of the dock */
+    transform: translate(-18px, 10px) rotate(6deg);
   }
   55% {
-    transform: translate(-130px, 28px) rotate(-10deg);
+    transform: translate(-160px, 44px) rotate(-14deg);
   }
   100% {
     opacity: 0;
-    transform: translate(-300px, 130px) rotate(-26deg);
+    transform: translate(-360px, 170px) rotate(-28deg);
   }
 }
 
@@ -258,14 +317,14 @@ body {
     transform: translate(0, 0) rotate(0deg);
   }
   18% {
-    transform: translate(-20px, -4px) rotate(-6deg);
+    transform: translate(18px, 10px) rotate(-6deg);
   }
   55% {
-    transform: translate(130px, 28px) rotate(10deg);
+    transform: translate(160px, 44px) rotate(14deg);
   }
   100% {
     opacity: 0;
-    transform: translate(300px, 130px) rotate(26deg);
+    transform: translate(360px, 170px) rotate(28deg);
   }
 }
 
@@ -275,14 +334,95 @@ body {
     transform: translate(0, 0) rotate(0deg);
   }
   25% {
-    transform: translate(-10px, -10px) rotate(-4deg);
+    transform: translate(-10px, 22px) rotate(-6deg);
   }
   60% {
-    transform: translate(60px, 110px) rotate(10deg);
+    transform: translate(80px, 150px) rotate(10deg);
   }
   100% {
     opacity: 0;
-    transform: translate(170px, 280px) rotate(18deg);
+    transform: translate(220px, 340px) rotate(20deg);
+  }
+}
+
+@keyframes tractor-left-enter {
+  0% {
+    transform: rotate(-16deg);
+  }
+  48% {
+    transform: rotate(-10deg);
+  }
+  70% {
+    transform: rotate(12deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes tractor-right-enter {
+  0% {
+    transform: rotate(16deg);
+  }
+  48% {
+    transform: rotate(10deg);
+  }
+  70% {
+    transform: rotate(-12deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes tractor-bottom-enter {
+  0% {
+    transform: rotate(14deg);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
+  75% {
+    transform: rotate(-10deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes tractor-left-exit {
+  0% {
+    transform: rotate(0deg);
+  }
+  18% {
+    transform: rotate(10deg);
+  }
+  100% {
+    transform: rotate(-16deg);
+  }
+}
+
+@keyframes tractor-right-exit {
+  0% {
+    transform: rotate(0deg);
+  }
+  18% {
+    transform: rotate(-10deg);
+  }
+  100% {
+    transform: rotate(16deg);
+  }
+}
+
+@keyframes tractor-bottom-exit {
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-10deg);
+  }
+  100% {
+    transform: rotate(14deg);
   }
 }
 
@@ -293,6 +433,15 @@ body {
   .truck-left-exit,
   .truck-right-exit,
   .truck-bottom-exit {
+    animation: none !important;
+  }
+
+  .truck-left-enter .truck-tractor,
+  .truck-right-enter .truck-tractor,
+  .truck-bottom-enter .truck-tractor,
+  .truck-left-exit .truck-tractor,
+  .truck-right-exit .truck-tractor,
+  .truck-bottom-exit .truck-tractor {
     animation: none !important;
   }
 }

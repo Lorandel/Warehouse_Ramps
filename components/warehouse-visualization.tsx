@@ -32,7 +32,7 @@ const createDefaultStatus = (): RampStatus => ({
 
 // Animation duration constants
 // Keep this in sync with the CSS exit animations (.truck-*-exit)
-const TRUCK_EXIT_ANIMATION_DURATION = 1400 // ms
+const TRUCK_EXIT_ANIMATION_DURATION = 1600 // ms (matches CSS truck-*-exit duration)
 
 function WarehouseVisualizationContent() {
   const isMounted = useRef(false)
