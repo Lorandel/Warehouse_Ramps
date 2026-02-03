@@ -1,0 +1,407 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
+  height: 100vh;
+  display: flex;
+  overflow: hidden;
+  touch-action: manipulation; /* Improves touch experience */
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+  gap: 4px;
+}
+
+/* Header removed as requested
+.header {
+  text-align: center;
+  font-size: 1.5rem;
+  padding: 4px 0;
+  flex-shrink: 0;
+}
+*/
+
+.warehouse-container {
+  flex: 1;
+  min-height: 0;
+  border: 1px solid #ccc;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  position: relative;
+}
+
+#warehouse-svg {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.3s ease;
+}
+
+#warehouse-svg svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-shrink: 0;
+  padding: 4px 0;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+}
+
+.legend-color.inactive {
+  background-color: #228b22;
+}
+.legend-color.active {
+  background-color: #f00;
+}
+.legend-color.defect {
+  background-color: #fc0;
+}
+
+.ramp {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ramp-base {
+  fill: #228b22;
+  stroke: #444;
+  stroke-width: 1;
+}
+
+.ramp.active .ramp-base {
+  fill: #f00;
+}
+.ramp.yellow .ramp-base {
+  fill: #fc0;
+}
+
+.ramp-number {
+  font-size: 25px;
+  font-weight: bold;
+  fill: white;
+}
+
+.truck {
+  transition: all 0.3s ease;
+}
+
+.truck-trailer {
+  fill: #fff;
+  stroke: #263238;
+  stroke-width: 1;
+}
+.truck-cabin {
+  fill: #f00;
+  stroke: #263238;
+  stroke-width: 1;
+}
+.truck-window {
+  fill: #90caf9;
+  stroke: #263238;
+  stroke-width: 0.5;
+}
+.truck-wheel {
+  fill: #212121;
+  stroke: #000;
+  stroke-width: 0.5;
+}
+
+/* Truck arrival animation styles */
+.truck-left-enter {
+  animation: truck-enter-left 1.2s ease-out forwards;
+}
+
+.truck-right-enter {
+  animation: truck-enter-right 1.2s ease-out forwards;
+}
+
+.truck-bottom-enter {
+  animation: truck-enter-bottom 1.2s ease-out forwards;
+}
+
+/* Truck departure animation styles */
+.truck-left-exit {
+  animation: truck-exit-left 1s ease-in forwards;
+}
+
+.truck-right-exit {
+  animation: truck-exit-right 1s ease-in forwards;
+}
+
+.truck-bottom-exit {
+  animation: truck-exit-bottom 1s ease-in forwards;
+}
+
+/* Arrival animations */
+@keyframes truck-enter-left {
+  0% {
+    opacity: 0;
+    transform: translate(-200px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes truck-enter-right {
+  0% {
+    opacity: 0;
+    transform: translate(200px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes truck-enter-bottom {
+  0% {
+    opacity: 0;
+    transform: translate(0, 200px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+}
+
+/* Departure animations */
+@keyframes truck-exit-left {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-200px, 0);
+  }
+}
+
+@keyframes truck-exit-right {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(200px, 0);
+  }
+}
+
+@keyframes truck-exit-bottom {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(0, 200px);
+  }
+}
+
+.grid-line {
+  stroke: #fff;
+  stroke-width: 1;
+  stroke-dasharray: 5, 5;
+  opacity: 0.7;
+}
+
+.input-field {
+  font-size: 16px;
+  padding: 4px 6px;
+  border: 1px solid #444444; /* Changed from #bbb to #444444 (dark grey) */
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.9);
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+/* Add hover and focus styles to make it clear inputs are editable */
+.input-field:hover {
+  background-color: #f9f9f9;
+  border-color: #666666;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #f80;
+  box-shadow: 0 0 0 2px rgba(255, 136, 0, 0.2);
+  background-color: #ffffff;
+}
+
+/* Enhanced highlight for auto-filled fields */
+.input-field.highlight-filled {
+  background-color: #e6f7ff;
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+  animation: pulse 1s;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(24, 144, 255, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(24, 144, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(24, 144, 255, 0);
+  }
+}
+
+/* Add a subtle typing indicator */
+.input-field:focus:not(.highlight-filled) {
+  background-color: #fffde7;
+}
+
+/* Add a subtle error indicator for no matches */
+.input-field.no-match {
+  background-color: #fff1f0;
+  border-color: #ff4d4f;
+}
+
+/* Special styling for foreignObject to ensure proper centering */
+foreignObject {
+  overflow: visible;
+}
+
+/* Styling for truck and trailer inputs */
+input[data-input-type="truck"] {
+  border-color: #444444; /* Changed from #f00 to #444444 (dark grey) */
+}
+
+input[data-input-type="trailer"] {
+  border-color: #444444; /* Changed from #0066cc to #444444 (dark grey) */
+}
+
+/* Orientation-specific styles */
+.app-container.portrait .header {
+  /* Header removed as requested
+  font-size: 1.2rem;
+  padding: 2px 0;
+  */
+}
+
+.app-container.portrait .legend {
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 2px 0;
+}
+
+.app-container.portrait .input-field {
+  font-size: 18px; /* Larger for touch on portrait */
+}
+
+/* 11-inch tablet specific optimizations */
+.tablet-11inch .input-field {
+  font-size: 20px; /* Larger font for 11-inch tablet */
+  padding: 6px 8px; /* More padding for better touch targets */
+}
+
+.tablet-11inch .ramp-number {
+  font-size: 30px; /* Larger numbers for better visibility */
+}
+
+.tablet-11inch.landscape .warehouse-container {
+  padding: 4px; /* Add some padding in landscape mode */
+}
+
+.tablet-11inch.portrait .warehouse-container {
+  padding: 2px; /* Less padding in portrait to maximize space */
+}
+
+/* Tablet-specific optimizations */
+@media (max-width: 1366px) and (min-width: 768px) {
+  /* Specific styles for tablets around 11-inch size */
+  .input-field {
+    font-size: 18px; /* Adjusted for split inputs */
+  }
+
+  .ramp-number {
+    font-size: 28px; /* Larger for better visibility */
+  }
+
+  /* Increase touch targets */
+  .ramp-base {
+    stroke-width: 1.5;
+  }
+
+  /* Optimize legend for 11-inch tablet */
+  /* Header removed as requested */
+
+  .legend-item {
+    font-size: 1rem;
+  }
+
+  .legend-color {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Header removed as requested */
+  .legend {
+    gap: 12px;
+    font-size: 0.8rem;
+  }
+  .legend-item {
+    gap: 4px;
+  }
+  .legend-color {
+    width: 14px;
+    height: 14px;
+  }
+  .input-field {
+    font-size: 14px;
+  }
+}
+
+/* Add styles for touch devices */
+@media (pointer: coarse) {
+  .input-field {
+    padding: 8px 6px; /* More padding for touch */
+  }
+
+  .ramp {
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+}
