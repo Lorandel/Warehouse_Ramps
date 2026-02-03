@@ -31,7 +31,7 @@ const createDefaultStatus = (): RampStatus => ({
 })
 
 // Animation duration constants
-const TRUCK_EXIT_ANIMATION_DURATION = 1600 // 1.6 seconds (matches CSS animation)
+const TRUCK_EXIT_ANIMATION_DURATION = 1800  // 1.6 seconds (matches CSS animation)
 
 function WarehouseVisualizationContent() {
   const isMounted = useRef(false)
