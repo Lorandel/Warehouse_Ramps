@@ -113,100 +113,85 @@ body {
 }
 
 .truck {
-  /* SVG groups don't always respect transition well; keep it minimal */
-  transition: opacity 0.2s ease;
-}
-
-/* Motion wrapper for the truck (the element that gets animated) */
-.truck-motion {
-  transform-box: fill-box;
-  /* default; overridden per side for more natural pivot */
-  transform-origin: 50% 50%;
-  will-change: transform, opacity;
-  pointer-events: none;
-}
-
-/* Tractor articulation (rotates around kingpin) */
-.truck-tractor {
-  transform-box: fill-box;
-  /* coupling point is the RIGHT edge of the tractor group */
-  transform-origin: 100% 50%;
-  will-change: transform;
+  transition: all 0.3s ease;
 }
 
 .truck-trailer {
-  fill: #fff;
-  stroke: #263238;
+  fill: #f8fafc;
+  stroke: #0b1220;
   stroke-width: 1;
 }
 .truck-cabin {
-  fill: #f00;
-  stroke: #263238;
+  fill: #e5e7eb;
+  stroke: #0b1220;
   stroke-width: 1;
 }
 .truck-window {
-  fill: #90caf9;
-  stroke: #263238;
+  fill: #93c5fd;
+  stroke: #0b1220;
   stroke-width: 0.5;
 }
 .truck-wheel {
-  fill: #212121;
-  stroke: #000;
-  stroke-width: 0.5;
+  fill: #111827;
+  stroke: #030712;
+  stroke-width: 0.6;
 }
 
 .truck-tire {
-  fill: #111827;
-  stroke: #030712;
+  fill: #0b1220;
+  stroke: #020617;
   stroke-width: 0.8;
 }
-
 .truck-rim {
   fill: #9ca3af;
   opacity: 0.9;
 }
 
+/* Ensure SVG CSS transforms animate reliably */
+.truck-motion {
+  pointer-events: none;
+  transform-box: fill-box;
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+.truck-tractor {
+  transform-box: fill-box;
+  /* kingpin-ish area: slightly toward the trailer */
+  transform-origin: 58% 50%;
+  will-change: transform;
+}
+
 /* Truck arrival animation styles */
 .truck-left-enter {
-  animation: truck-enter-left 1.8s cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
-  transform-origin: 100% 50%;
+  animation: truck-enter-left 2s cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
 }
-
 .truck-right-enter {
-  animation: truck-enter-right 1.8s cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
-  transform-origin: 0% 50%;
+  animation: truck-enter-right 2s cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
 }
-
 .truck-bottom-enter {
-  animation: truck-enter-bottom 1.8s cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
-  transform-origin: 50% 0%;
+  animation: truck-enter-bottom 2s cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
 }
 
 /* Truck departure animation styles */
 .truck-left-exit {
   animation: truck-exit-left 1.6s cubic-bezier(0.55, 0, 0.8, 0.25) forwards;
-  transform-origin: 100% 50%;
 }
-
 .truck-right-exit {
   animation: truck-exit-right 1.6s cubic-bezier(0.55, 0, 0.8, 0.25) forwards;
-  transform-origin: 0% 50%;
 }
-
 .truck-bottom-exit {
   animation: truck-exit-bottom 1.6s cubic-bezier(0.55, 0, 0.8, 0.25) forwards;
-  transform-origin: 50% 0%;
 }
 
-/* Articulation: tractor swings while approaching/exiting, then straightens at dock */
+/* Tractor articulation (visual-only, makes the reverse-in feel real) */
 .truck-left-enter .truck-tractor {
-  animation: tractor-left-enter 1.8s cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
+  animation: tractor-left-enter 2s cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
 }
 .truck-right-enter .truck-tractor {
-  animation: tractor-right-enter 1.8s cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
+  animation: tractor-right-enter 2s cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
 }
 .truck-bottom-enter .truck-tractor {
-  animation: tractor-bottom-enter 1.8s cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
+  animation: tractor-bottom-enter 2s cubic-bezier(0.2, 0.9, 0.25, 1) forwards;
 }
 
 .truck-left-exit .truck-tractor {
@@ -219,231 +204,93 @@ body {
   animation: tractor-bottom-exit 1.6s cubic-bezier(0.55, 0, 0.8, 0.25) forwards;
 }
 
-/* Arrival animations */
+/* Arrival animations (arc + align + tiny reverse-in) */
 @keyframes truck-enter-left {
-  0% {
-    opacity: 0;
-    transform: translate(-340px, 160px) rotate(-28deg);
-  }
-  15% {
-    opacity: 1;
-  }
-  48% {
-    /* approach on a gentle arc */
-    transform: translate(-150px, 40px) rotate(-14deg);
-  }
-  70% {
-    /* align (still outside), preparing to reverse */
-    transform: translate(-28px, -10px) rotate(9deg);
-  }
-  82% {
-    /* reverse-in (no overshoot into the building face) */
-    transform: translate(-8px, 4px) rotate(4deg);
-  }
-  100% {
-    opacity: 1;
-    transform: translate(0, 0) rotate(0deg);
-  }
+  0% { opacity: 0; transform: translate(-280px, 140px) rotate(-32deg); }
+  12% { opacity: 1; }
+  45% { transform: translate(-125px, 34px) rotate(-16deg); }
+  70% { transform: translate(-22px, -6px) rotate(10deg); }
+  84% { transform: translate(-7px, 3px) rotate(4deg); }
+  100% { opacity: 1; transform: translate(0, 0) rotate(0deg); }
 }
 
 @keyframes truck-enter-right {
-  0% {
-    opacity: 0;
-    transform: translate(340px, 160px) rotate(28deg);
-  }
-  15% {
-    opacity: 1;
-  }
-  48% {
-    transform: translate(150px, 40px) rotate(14deg);
-  }
-  70% {
-    transform: translate(28px, -10px) rotate(-9deg);
-  }
-  82% {
-    transform: translate(8px, 4px) rotate(-4deg);
-  }
-  100% {
-    opacity: 1;
-    transform: translate(0, 0) rotate(0deg);
-  }
+  0% { opacity: 0; transform: translate(280px, 140px) rotate(32deg); }
+  12% { opacity: 1; }
+  45% { transform: translate(125px, 34px) rotate(16deg); }
+  70% { transform: translate(22px, -6px) rotate(-10deg); }
+  84% { transform: translate(7px, 3px) rotate(-4deg); }
+  100% { opacity: 1; transform: translate(0, 0) rotate(0deg); }
 }
 
 @keyframes truck-enter-bottom {
-  0% {
-    opacity: 0;
-    transform: translate(200px, 320px) rotate(20deg);
-  }
-  15% {
-    opacity: 1;
-  }
-  50% {
-    transform: translate(70px, 150px) rotate(10deg);
-  }
-  75% {
-    transform: translate(-16px, 36px) rotate(-6deg);
-  }
-  86% {
-    transform: translate(6px, 10px) rotate(-2deg);
-  }
-  100% {
-    opacity: 1;
-    transform: translate(0, 0) rotate(0deg);
-  }
+  0% { opacity: 0; transform: translate(-120px, 300px) rotate(-22deg); }
+  12% { opacity: 1; }
+  48% { transform: translate(-40px, 140px) rotate(-12deg); }
+  72% { transform: translate(10px, 28px) rotate(8deg); }
+  86% { transform: translate(4px, 9px) rotate(3deg); }
+  100% { opacity: 1; transform: translate(0, 0) rotate(0deg); }
 }
 
-/* Departure animations */
+/* Departure animations (pull forward + arc away) */
 @keyframes truck-exit-left {
-  0% {
-    opacity: 1;
-    transform: translate(0, 0) rotate(0deg);
-  }
-  18% {
-    /* pull forward out of the dock */
-    transform: translate(-18px, 10px) rotate(6deg);
-  }
-  55% {
-    transform: translate(-160px, 44px) rotate(-14deg);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-360px, 170px) rotate(-28deg);
-  }
+  0% { opacity: 1; transform: translate(0, 0) rotate(0deg); }
+  18% { transform: translate(-8px, 4px) rotate(4deg); }
+  55% { transform: translate(-110px, 40px) rotate(-14deg); }
+  100% { opacity: 0; transform: translate(-280px, 140px) rotate(-32deg); }
 }
 
 @keyframes truck-exit-right {
-  0% {
-    opacity: 1;
-    transform: translate(0, 0) rotate(0deg);
-  }
-  18% {
-    transform: translate(18px, 10px) rotate(-6deg);
-  }
-  55% {
-    transform: translate(160px, 44px) rotate(14deg);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(360px, 170px) rotate(28deg);
-  }
+  0% { opacity: 1; transform: translate(0, 0) rotate(0deg); }
+  18% { transform: translate(8px, 4px) rotate(-4deg); }
+  55% { transform: translate(110px, 40px) rotate(14deg); }
+  100% { opacity: 0; transform: translate(280px, 140px) rotate(32deg); }
 }
 
 @keyframes truck-exit-bottom {
-  0% {
-    opacity: 1;
-    transform: translate(0, 0) rotate(0deg);
-  }
-  25% {
-    transform: translate(-10px, 22px) rotate(-6deg);
-  }
-  60% {
-    transform: translate(80px, 150px) rotate(10deg);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(220px, 340px) rotate(20deg);
-  }
+  0% { opacity: 1; transform: translate(0, 0) rotate(0deg); }
+  18% { transform: translate(5px, 10px) rotate(3deg); }
+  55% { transform: translate(-30px, 150px) rotate(-12deg); }
+  100% { opacity: 0; transform: translate(-120px, 300px) rotate(-22deg); }
 }
 
+/* Tractor swing keyframes */
 @keyframes tractor-left-enter {
-  0% {
-    transform: rotate(-16deg);
-  }
-  48% {
-    transform: rotate(-10deg);
-  }
-  70% {
-    transform: rotate(12deg);
-  }
-  100% {
-    transform: rotate(0deg);
-  }
+  0% { transform: rotate(-18deg); }
+  55% { transform: rotate(-10deg); }
+  78% { transform: rotate(10deg); }
+  100% { transform: rotate(0deg); }
 }
-
 @keyframes tractor-right-enter {
-  0% {
-    transform: rotate(16deg);
-  }
-  48% {
-    transform: rotate(10deg);
-  }
-  70% {
-    transform: rotate(-12deg);
-  }
-  100% {
-    transform: rotate(0deg);
-  }
+  0% { transform: rotate(18deg); }
+  55% { transform: rotate(10deg); }
+  78% { transform: rotate(-10deg); }
+  100% { transform: rotate(0deg); }
 }
-
 @keyframes tractor-bottom-enter {
-  0% {
-    transform: rotate(14deg);
-  }
-  50% {
-    transform: rotate(8deg);
-  }
-  75% {
-    transform: rotate(-10deg);
-  }
-  100% {
-    transform: rotate(0deg);
-  }
+  0% { transform: rotate(-16deg); }
+  58% { transform: rotate(-9deg); }
+  80% { transform: rotate(8deg); }
+  100% { transform: rotate(0deg); }
 }
 
 @keyframes tractor-left-exit {
-  0% {
-    transform: rotate(0deg);
-  }
-  18% {
-    transform: rotate(10deg);
-  }
-  100% {
-    transform: rotate(-16deg);
-  }
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(10deg); }
+  60% { transform: rotate(-10deg); }
+  100% { transform: rotate(-18deg); }
 }
-
 @keyframes tractor-right-exit {
-  0% {
-    transform: rotate(0deg);
-  }
-  18% {
-    transform: rotate(-10deg);
-  }
-  100% {
-    transform: rotate(16deg);
-  }
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(-10deg); }
+  60% { transform: rotate(10deg); }
+  100% { transform: rotate(18deg); }
 }
-
 @keyframes tractor-bottom-exit {
-  0% {
-    transform: rotate(0deg);
-  }
-  25% {
-    transform: rotate(-10deg);
-  }
-  100% {
-    transform: rotate(14deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .truck-left-enter,
-  .truck-right-enter,
-  .truck-bottom-enter,
-  .truck-left-exit,
-  .truck-right-exit,
-  .truck-bottom-exit {
-    animation: none !important;
-  }
-
-  .truck-left-enter .truck-tractor,
-  .truck-right-enter .truck-tractor,
-  .truck-bottom-enter .truck-tractor,
-  .truck-left-exit .truck-tractor,
-  .truck-right-exit .truck-tractor,
-  .truck-bottom-exit .truck-tractor {
-    animation: none !important;
-  }
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(8deg); }
+  60% { transform: rotate(-9deg); }
+  100% { transform: rotate(-16deg); }
 }
 
 .grid-line {

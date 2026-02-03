@@ -42,8 +42,8 @@ const config = {
   parkingZoneWidth: 180,
 }
 
-// Memoized truck component (realistic top‑down semi-truck + articulated tractor)
-// NOTE: We keep the surrounding layout structure intact; only the SVG drawing + motion behavior changed.
+// Memoized truck component (top-down articulated semi-truck)
+// Important: we don't change the app "skeleton" — only the SVG drawing + animation target.
 const Truck = memo(
   ({
     x,
@@ -53,135 +53,124 @@ const Truck = memo(
     animationClass,
   }: { x: number; y: number; side: string; flip: boolean; animationClass: string }) => {
     // Base orientation by side (final docked orientation)
-    // Local coords: the *dock contact point* (rear bumper center) is at (0,0)
-    // and the rig extends towards negative X (away from the building face).
     const rotation = side === "bottom" ? 270 : 0
-    const s = 1.1
 
     return (
-      <g transform={`translate(${x}, ${y})`}>
-        {/* This is the element that gets translated/rotated during the approach/exit */}
-        <g className={`truck-motion ${animationClass}`} filter="url(#truckShadow)">
-          {/* Final orientation (flip + base rotation) lives here, separate from the motion group */}
-          <g transform={`${flip ? "scale(-1,1)" : ""} rotate(${rotation}) scale(${s})`}>
-            {/*
-              TOP‑DOWN RIG
-              - Dock contact (rear bumper) at (0,0)
-              - Trailer extends to negative X
-              - Tractor is articulated and rotates around the kingpin
-            */}
+      // Motion wrapper: CSS animations run on this element (no SVG transform attr here).
+      <g className={`truck-motion ${animationClass}`}>
+        {/* Static placement + final orientation */}
+        <g transform={`translate(${x}, ${y}) rotate(${rotation}) ${flip ? "scale(-1,1)" : ""}`}>
+          {/*
+            Coordinate system:
+            - Rear bumper center (dock contact) is at (0,0)
+            - Trailer extends towards negative X (away from dock)
+          */}
 
-            {/* TRAILER */}
-            <g className="truck-trailer">
-              {/* body */}
-              <rect x="-182" y="-24" width="182" height="48" rx="4" fill="url(#trailerGrad)" stroke="#0b1220" strokeWidth="1" />
-              {/* subtle edge shading */}
-              <rect x="-182" y="-24" width="182" height="8" rx="4" fill="#ffffff" opacity="0.35" />
-              <rect x="-182" y="16" width="182" height="8" rx="4" fill="#0b1220" opacity="0.06" />
+          {/* TRAILER BODY */}
+          <g>
+            <rect x="-172" y="-23" width="172" height="46" rx="4" fill="#f8fafc" stroke="#0b1220" strokeWidth="1.2" />
+            {/* roof highlight */}
+            <rect x="-172" y="-23" width="172" height="8" rx="4" fill="#ffffff" opacity="0.45" />
+            {/* under-run / skirt */}
+            <rect x="-172" y="14" width="172" height="9" rx="4" fill="#0b1220" opacity="0.10" />
 
-              {/* rear door frame at dock */}
-              <rect x="-12" y="-22" width="12" height="44" rx="2" fill="#0b1220" opacity="0.9" />
-              <line x1="-10" y1="-18" x2="-10" y2="18" stroke="#e5e7eb" strokeWidth="1" opacity="0.8" />
-              <line x1="-6" y1="-18" x2="-6" y2="18" stroke="#e5e7eb" strokeWidth="1" opacity="0.55" />
-              <circle cx="-4" cy="0" r="1.6" fill="#e5e7eb" opacity="0.9" />
+            {/* rear door frame (at dock) */}
+            <rect x="-10" y="-21" width="10" height="42" rx="2" fill="#111827" opacity="0.9" />
+            <line x1="-7" y1="-18" x2="-7" y2="18" stroke="#e5e7eb" strokeWidth="1.1" opacity="0.9" />
+            <line x1="-4" y1="-18" x2="-4" y2="18" stroke="#e5e7eb" strokeWidth="1" opacity="0.6" />
 
-              {/* ribs / panel lines */}
-              {Array.from({ length: 11 }).map((_, i) => (
-                <line
-                  key={`rib-${i}`}
-                  x1={-170 + i * 15}
-                  y1={-22}
-                  x2={-170 + i * 15}
-                  y2={22}
-                  stroke="#94a3b8"
-                  strokeWidth="1"
-                  opacity="0.22"
-                />
-              ))}
-
-              {/* reflective strip */}
-              <rect x="-176" y="16" width="164" height="4" rx="2" fill="#fbbf24" opacity="0.55" />
-
-              {/* underride guard */}
-              <rect x="-16" y="18" width="16" height="6" rx="2" fill="#030712" opacity="0.9" />
-
-              {/* landing gear */}
-              <rect x="-132" y="24" width="6" height="10" rx="1" fill="#111827" opacity="0.7" />
-              <rect x="-122" y="24" width="6" height="10" rx="1" fill="#111827" opacity="0.7" />
-
-              {/* tail lights */}
-              <rect x="-18" y="-14" width="6" height="8" rx="2" fill="#ef4444" opacity="0.95" />
-              <rect x="-18" y="6" width="6" height="8" rx="2" fill="#ef4444" opacity="0.95" />
-            </g>
-
-            {/* FIFTH WHEEL / KINGPIN AREA */}
-            <g opacity="0.85">
-              <rect x="-66" y="-14" width="34" height="28" rx="4" fill="#0b1220" opacity="0.6" />
-              <rect x="-58" y="-10" width="18" height="20" rx="3" fill="#111827" opacity="0.7" />
-            </g>
-
-            {/* TRACTOR (inner group rotates; translate anchors to kingpin) */}
-            <g transform="translate(-66, 0)">
-              <g className="truck-tractor">
-                {/* chassis */}
-                <rect x="-86" y="-14" width="86" height="28" rx="6" fill="#0f172a" opacity="0.85" />
-
-                {/* cab + sleeper */}
-                <path
-                  d="M -74 -18 h 40 a 8 8 0 0 1 8 8 v 20 a 8 8 0 0 1 -8 8 h -32 l -10 -6 v -22 z"
-                  fill="url(#cabGrad)"
-                  stroke="#0b1220"
-                  strokeWidth="1"
-                />
-
-                {/* hood */}
-                <rect x="-92" y="-16" width="20" height="32" rx="8" fill="#111827" opacity="0.92" />
-
-                {/* windshield */}
-                <rect x="-56" y="-11" width="16" height="22" rx="4" fill="#93c5fd" opacity="0.85" />
-                {/* side window */}
-                <rect x="-40" y="-10" width="10" height="10" rx="3" fill="#93c5fd" opacity="0.75" />
-
-                {/* fuel tank */}
-                <rect x="-60" y="16" width="26" height="6" rx="3" fill="#9ca3af" opacity="0.8" />
-
-                {/* headlights */}
-                <rect x="-96" y="-10" width="6" height="6" rx="2" fill="#fef9c3" opacity="0.95" />
-                <rect x="-96" y="4" width="6" height="6" rx="2" fill="#fef9c3" opacity="0.95" />
-
-                {/* hint shadow */}
-                <rect x="-92" y="-4" width="92" height="8" fill="#0b1220" opacity="0.08" />
-              </g>
-            </g>
-
-            {/* TIRES (rects, top-down) */}
-            {[
-              // trailer: 2 axles near rear
-              { x: -66, y: -30 },
-              { x: -50, y: -30 },
-              { x: -66, y: 22 },
-              { x: -50, y: 22 },
-              { x: -92, y: -30 },
-              { x: -76, y: -30 },
-              { x: -92, y: 22 },
-              { x: -76, y: 22 },
-
-              // tractor rear axle
-              { x: -140, y: -30 },
-              { x: -124, y: -30 },
-              { x: -140, y: 22 },
-              { x: -124, y: 22 },
-
-              // tractor front axle
-              { x: -164, y: -26 },
-              { x: -164, y: 18 },
-            ].map((t, idx) => (
-              <g key={`tire-${idx}`}>
-                <rect className="truck-tire" x={t.x} y={t.y} width="10" height="8" rx="2" />
-                <rect className="truck-rim" x={t.x + 3} y={t.y + 2} width="4" height="4" rx="1" />
-              </g>
+            {/* subtle panel lines */}
+            {Array.from({ length: 10 }).map((_, i) => (
+              <line
+                key={`p-${i}`}
+                x1={-160 + i * 16}
+                y1={-21}
+                x2={-160 + i * 16}
+                y2={21}
+                stroke="#94a3b8"
+                strokeWidth="1"
+                opacity="0.22"
+              />
             ))}
+
+            {/* reflective strip */}
+            <rect x="-166" y="16" width="148" height="3.5" rx="2" fill="#f59e0b" opacity="0.55" />
+
+            {/* tail lights */}
+            <rect x="-18" y="-13" width="6" height="7" rx="2" fill="#ef4444" opacity="0.95" />
+            <rect x="-18" y="6" width="6" height="7" rx="2" fill="#ef4444" opacity="0.95" />
           </g>
+
+          {/* KINGPIN / FIFTH WHEEL AREA */}
+          <g opacity="0.85">
+            <rect x="-66" y="-13" width="34" height="26" rx="4" fill="#111827" opacity="0.55" />
+            <rect x="-58" y="-9" width="18" height="18" rx="3" fill="#0b1220" opacity="0.65" />
+          </g>
+
+          {/* TRACTOR (separate group so it can "articulate" via CSS) */}
+          <g className="truck-tractor" transform="translate(-66, 0)">
+            {/* chassis */}
+            <rect x="-84" y="-14" width="84" height="28" rx="6" fill="#0f172a" opacity="0.9" />
+
+            {/* cab (more truck-like silhouette) */}
+            <path
+              d="M -74 -18 h 40 a 8 8 0 0 1 8 8 v 20 a 8 8 0 0 1 -8 8 h -30 l -10 -7 v -22 z"
+              fill="#e5e7eb"
+              stroke="#0b1220"
+              strokeWidth="1.2"
+            />
+            {/* roof fairing */}
+            <path d="M -42 -18 h 10 a 6 6 0 0 1 6 6 v 3 h -16 z" fill="#cbd5e1" opacity="0.95" />
+
+            {/* hood */}
+            <rect x="-92" y="-16" width="20" height="32" rx="8" fill="#111827" opacity="0.92" />
+            {/* grille hint */}
+            <rect x="-92" y="-6" width="10" height="12" rx="3" fill="#0b1220" opacity="0.35" />
+
+            {/* windshield */}
+            <rect x="-56" y="-11" width="16" height="22" rx="4" fill="#93c5fd" opacity="0.85" />
+            {/* side window */}
+            <rect x="-39" y="-9" width="10" height="9" rx="3" fill="#93c5fd" opacity="0.7" />
+
+            {/* mirrors */}
+            <rect x="-62" y="-18" width="3" height="8" rx="1.5" fill="#111827" opacity="0.9" />
+            <rect x="-62" y="10" width="3" height="8" rx="1.5" fill="#111827" opacity="0.9" />
+
+            {/* fuel tank */}
+            <rect x="-58" y="16" width="26" height="6" rx="3" fill="#9ca3af" opacity="0.85" />
+
+            {/* headlights */}
+            <rect x="-96" y="-10" width="6" height="6" rx="2" fill="#fef9c3" opacity="0.95" />
+            <rect x="-96" y="4" width="6" height="6" rx="2" fill="#fef9c3" opacity="0.95" />
+          </g>
+
+          {/* TIRES (top-down blocks) */}
+          {[
+            // trailer: two axles near rear
+            { x: -64, y: -30 },
+            { x: -50, y: -30 },
+            { x: -64, y: 22 },
+            { x: -50, y: 22 },
+            { x: -88, y: -30 },
+            { x: -74, y: -30 },
+            { x: -88, y: 22 },
+            { x: -74, y: 22 },
+
+            // tractor rear axle
+            { x: -138, y: -30 },
+            { x: -124, y: -30 },
+            { x: -138, y: 22 },
+            { x: -124, y: 22 },
+
+            // tractor front axle
+            { x: -162, y: -26 },
+            { x: -162, y: 18 },
+          ].map((t, idx) => (
+            <g key={`t-${idx}`}>
+              <rect className="truck-tire" x={t.x} y={t.y} width="10" height="8" rx="2" />
+              <rect className="truck-rim" x={t.x + 3} y={t.y + 2} width="4" height="4" rx="1" />
+            </g>
+          ))}
         </g>
       </g>
     )
@@ -208,55 +197,24 @@ const Ramp = memo(
     onClick: () => void
   }) => (
     <>
-      {/* Dock door + shelter (visual only; click area stays on the colored ramp) */}
+      {/* Loading dock detail */}
       <g transform={`translate(${x}, ${y}) rotate(${rotation})`}>
-        {/* Door recess */}
-        <rect x="-36" y="-30" width="72" height="60" fill="#475569" opacity="0.65" rx="4" />
-        {/* Shelter frame */}
-        <rect x="-30" y="-24" width="60" height="48" fill="#0f172a" opacity="0.75" rx="4" />
-        {/* Dock door */}
-        <rect x="-22" y="-18" width="44" height="36" fill="#e2e8f0" stroke="#94a3b8" strokeWidth="1" rx="3" />
-        {/* Door slats */}
-        {Array.from({ length: 5 }).map((_, i) => (
-          <line
-            key={`door-slat-${i}`}
-            x1={-20}
-            y1={-12 + i * 6}
-            x2={20}
-            y2={-12 + i * 6}
-            stroke="#cbd5e1"
-            strokeWidth="2"
-            opacity="0.85"
-          />
-        ))}
-        {/* Bumpers */}
-        <rect x="-34" y="-10" width="6" height="20" rx="2" fill="#111827" opacity="0.9" />
-        <rect x="28" y="-10" width="6" height="20" rx="2" fill="#111827" opacity="0.9" />
-
-        {/* Status light */}
-        <circle
-          cx="0"
-          cy="-36"
-          r="6"
-          fill={status.yellow ? "#fbbf24" : status.active ? "#ef4444" : "#22c55e"}
-          stroke="#0f172a"
-          strokeWidth="2"
-          opacity="0.95"
-        />
+        <rect x="-30" y="-25" width="60" height="50" fill="#555555" stroke="#444444" strokeWidth="1" rx="2" />
+        <rect x="-25" y="-20" width="50" height="40" fill="#666666" stroke="#555555" strokeWidth="1" rx="2" />
       </g>
 
-      {/* Ramp click target (kept as the existing colored rectangle) */}
+      {/* Ramp */}
       <g
         className={`ramp ${status.active ? "active" : ""} ${status.yellow ? "yellow" : ""}`}
         onClick={onClick}
         transform={`translate(${x}, ${y}) rotate(${rotation})`}
       >
-        {/* Dock plate / leveler */}
-        <rect className="ramp-base" x="-26" y="-18" width="52" height="36" rx="5" />
+        {/* Ramp base */}
+        <rect className="ramp-base" x="-25" y="-20" width="50" height="40" rx="3" />
 
         {/* Ramp number - always upright */}
         <g transform={`rotate(${-rotation})`}>
-          <text className="ramp-number" x="0" y="1" textAnchor="middle" dominantBaseline="middle">
+          <text className="ramp-number" x="0" y="0" textAnchor="middle" dominantBaseline="middle">
             {rampNum}
           </text>
         </g>
@@ -592,19 +550,21 @@ function WarehouseLayout({
 
   // Function to get truck position and animation classes based on ramp position
   const getTruckPosition = useCallback((rampX: number, rampY: number, side: string, isExiting: boolean) => {
-    // how close the trailer sits to the dock face (smaller = tighter to ramp)
-    const dockSnap = 52
+    // Rear bumper (dock contact) sits almost on the ramp face.
+    // Tiny offsets keep the ramp still visible and avoid overlapping click targets.
+    const dockOffset = 2
+
     switch (side) {
       case "left":
         return {
-          x: rampX - dockSnap,
+          x: rampX - dockOffset,
           y: rampY,
           flip: false,
           animationClass: isExiting ? "truck-left-exit" : "truck-left-enter",
         }
       case "right":
         return {
-          x: rampX + dockSnap,
+          x: rampX + dockOffset,
           y: rampY,
           flip: true,
           animationClass: isExiting ? "truck-right-exit" : "truck-right-enter",
@@ -612,7 +572,7 @@ function WarehouseLayout({
       case "bottom":
         return {
           x: rampX,
-          y: rampY + dockSnap,
+          y: rampY + dockOffset,
           flip: false,
           animationClass: isExiting ? "truck-bottom-exit" : "truck-bottom-enter",
         }
@@ -642,196 +602,81 @@ function WarehouseLayout({
 
   return (
     <svg width={config.svgWidth} height={config.svgHeight} viewBox={`0 0 ${config.svgWidth} ${config.svgHeight}`}>
-      <defs>
-        {/* Yard / asphalt texture */}
-        <filter id="asphaltNoise" x="-20%" y="-20%" width="140%" height="140%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="noise" />
-          <feColorMatrix
-            type="matrix"
-            values="0.35 0 0 0 0.25  0 0.35 0 0 0.25  0 0 0.35 0 0.25  0 0 0 1 0"
-            result="tint"
-          />
-          <feComposite in="tint" in2="SourceGraphic" operator="overlay" />
-        </filter>
+      <rect x="0" y="0" width={config.svgWidth} height={config.svgHeight} fill="#888888" />
 
-        {/* Concrete apron / dock zone */}
-        <linearGradient id="concreteGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#cbd5e1" />
-          <stop offset="1" stopColor="#94a3b8" />
-        </linearGradient>
-
-        {/* Building facade + roof */}
-        <linearGradient id="buildingWall" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#9aa3ad" />
-          <stop offset="0.5" stopColor="#b6bec7" />
-          <stop offset="1" stopColor="#8b949e" />
-        </linearGradient>
-        <linearGradient id="roofGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#6b7280" />
-          <stop offset="1" stopColor="#4b5563" />
-        </linearGradient>
-
-        {/* Truck paint */}
-        <linearGradient id="trailerGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#f8fafc" />
-          <stop offset="1" stopColor="#e2e8f0" />
-        </linearGradient>
-        <linearGradient id="cabGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#ef4444" />
-          <stop offset="1" stopColor="#b91c1c" />
-        </linearGradient>
-
-        {/* Shadows */}
-        <filter id="buildingShadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#000000" floodOpacity="0.25" />
-        </filter>
-        <filter id="truckShadow" x="-40%" y="-40%" width="180%" height="180%">
-          <feDropShadow dx="0" dy="6" stdDeviation="5" floodColor="#000000" floodOpacity="0.35" />
-        </filter>
-      </defs>
-
-      {/* Yard background */}
-      <rect x="0" y="0" width={config.svgWidth} height={config.svgHeight} fill="#6b7280" filter="url(#asphaltNoise)" />
-
-      {/* Parking / maneuvering lanes */}
+      {/* Parking areas */}
       <rect
         x={config.buildingX - config.parkingZoneWidth}
         y={config.buildingY}
         width={config.parkingZoneWidth}
         height={config.buildingHeight}
-        fill="#7c8796"
-        opacity="0.95"
+        fill="#aaaaaa"
       />
       <rect
         x={config.buildingX + config.buildingWidth}
         y={config.buildingY}
         width={config.parkingZoneWidth}
         height={config.buildingHeight}
-        fill="#7c8796"
-        opacity="0.95"
+        fill="#aaaaaa"
       />
       <rect
         x={config.buildingX}
         y={config.buildingY + config.buildingHeight}
         width={config.buildingWidth}
         height={config.parkingZoneWidth}
-        fill="#7c8796"
-        opacity="0.95"
+        fill="#aaaaaa"
       />
 
-      {/* Concrete apron directly at dock faces */}
-      <rect x={config.buildingX - 22} y={config.buildingY} width="22" height={config.buildingHeight} fill="url(#concreteGrad)" opacity="0.95" />
-      <rect x={config.buildingX + config.buildingWidth} y={config.buildingY} width="22" height={config.buildingHeight} fill="url(#concreteGrad)" opacity="0.95" />
-      <rect x={config.buildingX} y={config.buildingY + config.buildingHeight} width={config.buildingWidth} height="22" fill="url(#concreteGrad)" opacity="0.95" />
-
-      {/* Lane markings */}
-      <g opacity="0.9">
-        <line
-          x1={config.buildingX - config.parkingZoneWidth / 2}
-          y1={config.buildingY}
-          x2={config.buildingX - config.parkingZoneWidth / 2}
-          y2={config.buildingY + config.buildingHeight}
-          stroke="#e5e7eb"
-          strokeWidth="3"
-          strokeDasharray="18 14"
-        />
-        <line
-          x1={config.buildingX + config.buildingWidth + config.parkingZoneWidth / 2}
-          y1={config.buildingY}
-          x2={config.buildingX + config.buildingWidth + config.parkingZoneWidth / 2}
-          y2={config.buildingY + config.buildingHeight}
-          stroke="#e5e7eb"
-          strokeWidth="3"
-          strokeDasharray="18 14"
-        />
-        <line
-          x1={config.buildingX}
-          y1={config.buildingY + config.buildingHeight + config.parkingZoneWidth / 2}
-          x2={config.buildingX + config.buildingWidth}
-          y2={config.buildingY + config.buildingHeight + config.parkingZoneWidth / 2}
-          stroke="#e5e7eb"
-          strokeWidth="3"
-          strokeDasharray="18 14"
-        />
-      </g>
-
-      {/* Main warehouse building (shadow + facade) */}
+      {/* Main warehouse building */}
       <rect
         x={config.buildingX}
         y={config.buildingY}
         width={config.buildingWidth}
         height={config.buildingHeight}
-        fill="url(#buildingWall)"
-        stroke="#475569"
+        fill="#999999"
+        stroke="#666666"
         strokeWidth="8"
-        filter="url(#buildingShadow)"
       />
-
-      {/* Roof strip + slight perspective edge */}
-      <g opacity="0.95">
-        <rect
-          x={config.buildingX + 6}
-          y={config.buildingY + 6}
-          width={config.buildingWidth - 12}
-          height="54"
-          fill="url(#roofGrad)"
-          opacity="0.55"
-        />
-        <line
-          x1={config.buildingX + 6}
-          y1={config.buildingY + 60}
-          x2={config.buildingX + config.buildingWidth - 6}
-          y2={config.buildingY + 60}
-          stroke="#334155"
-          strokeWidth="2"
-          opacity="0.6"
-        />
-      </g>
-
-      {/* Paneling lines */}
-      <g opacity="0.22">
-        {Array.from({ length: 22 }).map((_, i) => (
-          <line
-            key={`panel-${i}`}
-            x1={config.buildingX + 20 + i * 64}
-            y1={config.buildingY + 70}
-            x2={config.buildingX + 20 + i * 64}
-            y2={config.buildingY + config.buildingHeight - 20}
-            stroke="#0f172a"
-            strokeWidth="2"
-          />
-        ))}
-      </g>
 
       {/* Central area */}
       <rect
         x={config.buildingX + (config.buildingWidth - centralAreaWidth) / 2}
-        y={config.buildingY + 80}
+        y={config.buildingY + 50}
         width={centralAreaWidth}
-        height={config.buildingHeight - 240}
-        fill="#6b7280"
-        stroke="#475569"
+        height={config.buildingHeight - 200}
+        fill="#777777"
+        stroke="#666666"
         strokeWidth="2"
-        opacity="0.65"
       />
 
-      {/* Input areas (kept in same places) */}
-      <rect x={config.buildingX + 60} y={config.buildingY + 20} width="320" height={config.buildingHeight - 40} fill="#e5e7eb" stroke="#cbd5e1" strokeWidth="1" opacity="0.92" />
-      <rect x={config.buildingX + config.buildingWidth - 380} y={config.buildingY + 20} width="320" height={config.buildingHeight - 40} fill="#e5e7eb" stroke="#cbd5e1" strokeWidth="1" opacity="0.92" />
-      <rect x={config.buildingX + 80} y={config.buildingY + config.buildingHeight - 150} width={config.buildingWidth - 160} height="100" fill="#e5e7eb" stroke="#cbd5e1" strokeWidth="1" opacity="0.92" />
-
-      {/* Label */}
-      <text
-        x={config.buildingX + config.buildingWidth / 2}
-        y={config.buildingY + 45}
-        textAnchor="middle"
-        fontSize="28"
-        fontWeight="700"
-        fill="#0f172a"
-        opacity="0.55"
-      >
-        WAREHOUSE
-      </text>
+      {/* Input areas */}
+      <rect
+        x={config.buildingX + 60}
+        y={config.buildingY + 20}
+        width="320"
+        height={config.buildingHeight - 40}
+        fill="#d9d9d9"
+        stroke="#cccccc"
+        strokeWidth="1"
+      />
+      <rect
+        x={config.buildingX + config.buildingWidth - 380}
+        y={config.buildingY + 20}
+        width="320"
+        height={config.buildingHeight - 40}
+        fill="#d9d9d9"
+        stroke="#cccccc"
+        strokeWidth="1"
+      />
+      <rect
+        x={config.buildingX + 80}
+        y={config.buildingY + config.buildingHeight - 150}
+        width={config.buildingWidth - 160}
+        height="100"
+        fill="#d9d9d9"
+        stroke="#cccccc"
+        strokeWidth="1"
+      />
 
       {/* Grid lines */}
       {gridLines}
